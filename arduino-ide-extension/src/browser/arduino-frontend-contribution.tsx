@@ -419,6 +419,15 @@ export class ArduinoFrontendContribution implements FrontendApplicationContribut
                 description: 'Background color of the toolbar items when hovering over them. Such as Upload, Verify, etc.'
             },
             {
+              id: 'arduino.toolbar.toggleBackground',
+              defaults: {
+                  dark: 'editor.selectionBackground',
+                  light: 'editor.selectionBackground',
+                  hc: 'activityBar.inactiveForeground'
+              },
+              description: 'Toggle color of the toolbar items when they are currently toggled (the command is in progress)'
+            },
+            {
                 id: 'arduino.output.foreground',
                 defaults: {
                     dark: 'editor.foreground',

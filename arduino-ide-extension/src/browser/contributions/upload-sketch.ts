@@ -22,7 +22,7 @@ export class UploadSketch extends SketchContribution {
     @inject(BoardsServiceProvider)
     protected readonly boardsServiceClientImpl: BoardsServiceProvider;
 
-    uploadInProgress = false;
+    protected uploadInProgress = false;
 
     registerCommands(registry: CommandRegistry): void {
         registry.registerCommand(UploadSketch.Commands.UPLOAD_SKETCH, {

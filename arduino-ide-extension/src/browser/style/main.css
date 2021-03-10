@@ -16,7 +16,7 @@
 }
 
 .p-TabBar-toolbar .item.arduino-tool-item:hover > div {
-    background: white;
+    background: var(--theia-arduino-toolbar-hoverBackground);
 }
 
 .arduino-verify-sketch--toolbar,
@@ -30,7 +30,7 @@
 }
 
 .item.arduino-tool-item.toggled .arduino-verify-sketch--toolbar {
-  background-color: rgb(255,204,0) !important;
+  background-color: var(--theia-arduino-toolbar-toggleBackground) !important;
 }
 
 .arduino-tool-icon {

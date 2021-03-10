@@ -18,7 +18,7 @@ export class VerifySketch extends SketchContribution {
     @inject(BoardsServiceProvider)
     protected readonly boardsServiceClientImpl: BoardsServiceProvider;
 
-    verifyInProgress = false;
+    protected verifyInProgress = false;
 
     registerCommands(registry: CommandRegistry): void {
         registry.registerCommand(VerifySketch.Commands.VERIFY_SKETCH, {
