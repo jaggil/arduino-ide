@@ -6,13 +6,15 @@ import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
 import 'react-tabs/style/react-tabs.css';
 import { Disable } from 'react-disable';
 import URI from '@theia/core/lib/common/uri';
-import { Emitter } from '@theia/core/lib/common/event';
+import { Event, Emitter } from '@theia/core/lib/common/event';
 import { Deferred } from '@theia/core/lib/common/promise-util';
 import { deepClone } from '@theia/core/lib/common/objects';
 import { FileService } from '@theia/filesystem/lib/browser/file-service';
 import { ThemeService } from '@theia/core/lib/browser/theming';
 import { MaybePromise } from '@theia/core/lib/common/types';
 import { WindowService } from '@theia/core/lib/browser/window/window-service';
+import { CommandService } from '@theia/core';
+import { CommonCommands } from '@theia/core/lib/browser/common-frontend-contribution';
 import { FileDialogService } from '@theia/filesystem/lib/browser/file-dialog/file-dialog-service';
 import { DisposableCollection } from '@theia/core/lib/common/disposable';
 import { FrontendApplicationStateService } from '@theia/core/lib/browser/frontend-application-state';
@@ -376,8 +378,17 @@ export class SettingsComponent extends React.Component<SettingsComponent.Props, 
                     onChange={this.additionalUrlsDidChange} />
                 <i className='fa fa-window-restore theia-button shrink' onClick={this.editAdditionalUrlDidClick} />
             </div>
+
+            <div className='flex-line'>
+                <button className='theia-button shrink' onClick={this.openExtendedSettings}>Extended Settings</button>
+            </div>
         </div>;
     }
+
+    protected openExtendedSettings = (e: React.MouseEvent<HTMLElement>) => {
+      this.props.commandService.executeCommand(CommonCommands.OPEN_PREFERENCES.id);
+      this.props.onCloseDidRequestEmitter.fire();
+    } 
 
     protected renderNetwork(): React.ReactNode {
         return <div className='content noselect'>
@@ -662,6 +673,8 @@ export namespace SettingsComponent {
         readonly fileService: FileService;
         readonly fileDialogService: FileDialogService;
         readonly windowService: WindowService;
+        readonly onCloseDidRequestEmitter: Emitter<void>;
+        readonly commandService: CommandService;
     }
     export interface State extends Settings { }
 }
@@ -681,12 +694,23 @@ export class SettingsWidget extends ReactWidget {
     @inject(WindowService)
     protected readonly windowService: WindowService;
 
+    @inject(CommandService)
+    protected commandService: CommandService;
+
+    protected readonly onCloseDidRequestEmitter = new Emitter<void>();
+    get onCloseDidRequest(): Event<void> {
+        return this.onCloseDidRequestEmitter.event;
+    }
+
     protected render(): React.ReactNode {
         return <SettingsComponent
             settingsService={this.settingsService}
             fileService={this.fileService}
             fileDialogService={this.fileDialogService}
-            windowService={this.windowService} />;
+            windowService={this.windowService}
+            onCloseDidRequestEmitter={this.onCloseDidRequestEmitter}
+            commandService={this.commandService}
+            />;
     }
 
 }
@@ -733,7 +757,10 @@ export class SettingsDialog extends AbstractDialog<Promise<Settings>> {
             Widget.detach(this.widget);
         }
         Widget.attach(this.widget, this.contentNode);
-        this.toDisposeOnDetach.push(this.settingsService.onDidChange(() => this.update()));
+        this.toDisposeOnDetach.pushAll([
+            this.settingsService.onDidChange(() => this.update()),
+            this.widget.onCloseDidRequest(() => this.close())
+        ]);
         super.onAfterAttach(msg);
         this.update();
     }
